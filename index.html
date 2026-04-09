@@ -1,102 +1,411 @@
-import React, { useState } from "react";
-import { loadStripe } from '@stripe/stripe-js';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zenvy</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-// Stripe requires actual Price IDs from your Stripe Dashboard. Use test mode for development.
-const stripePromise = loadStripe('YOUR_STRIPE_PUBLIC_KEY');
-
-export default function Storefront() {
-  const [cart, setCart] = useState([]);
-
-  const products = [
-    { id: 'price_1', name: "Hydrating Lip Gloss", desc: "High-shine gloss with long-lasting hydration", price: 12.99, img: "https://m.media-amazon.com/images/I/61rktK9cD7L._AC_SL1500_.jpg" },
-    { id: 'price_2', name: "Matte Liquid Foundation", desc: "Full coverage, smooth finish", price: 14.99, img: "https://m.media-amazon.com/images/I/71uL0efFrNL._AC_SL1500_.jpg" },
-    { id: 'price_3', name: "Poreless Face Primer", desc: "Blurs pores instantly", price: 11.99, img: "https://m.media-amazon.com/images/I/71dlpHnDZ-L._AC_SL1500_.jpg" },
-    { id: 'price_4', name: "Waterproof Mascara", desc: "Long-lasting volume", price: 9.99, img: "https://m.media-amazon.com/images/I/71bXnHq+Z9L._AC_SL1500_.jpg" },
-    { id: 'price_5', name: "Cream Blush Stick", desc: "Natural glow finish", price: 10.99, img: "https://m.media-amazon.com/images/I/61g5l2Aq8+L._AC_SL1500_.jpg" },
-    { id: 'price_6', name: "Makeup Setting Spray", desc: "Locks makeup all day", price: 13.99, img: "https://m.media-amazon.com/images/I/71Bdl7yx6nL._AC_SL1500_.jpg" }
-  ];
-
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-  };
-
-  const handleCheckout = async () => {
-    if (cart.length === 0) {
-      alert('Your cart is empty. Add items before checkout.');
-      return;
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #fdf6f9;
+      color: #1a1a1a;
     }
 
-    const stripe = await stripePromise;
-    
-    try {
-      const { error } = await stripe.redirectToCheckout({
-        lineItems: cart.map(item => ({ price: item.id, quantity: 1 })),
-        mode: 'payment',
-        successUrl: window.location.href,
-        cancelUrl: window.location.href
-      });
-      if (error) console.error(error);
-    } catch (err) {
-      console.error('Stripe checkout error:', err);
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 48px;
+      background: #fff;
+      border-bottom: 0.5px solid #eee;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-  };
+    .logo {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      color: #c0437a;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      color: #555;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #c0437a; }
+    .cart-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #c0437a, #8b5cf6);
+      color: #fff;
+      border: none;
+      padding: 9px 22px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: opacity 0.2s;
+    }
+    .cart-btn:hover { opacity: 0.88; }
+    .cart-badge {
+      background: rgba(255,255,255,0.3);
+      border-radius: 10px;
+      padding: 1px 8px;
+      font-size: 12px;
+    }
 
-  return (
-    <div className="min-h-screen bg-cover bg-center text-gray-900" style={{backgroundImage: 'url(https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&w=1650&q=80)'}}>
-      <nav className="flex items-center justify-between p-4 bg-white/70 backdrop-blur-md shadow-sm sticky top-0">
-        <h1 className="text-xl font-bold tracking-wide">Zenvy</h1>
-        <div className="space-x-6">
-          <a href="#" className="hover:text-pink-500">Home</a>
-          <a href="#products" className="hover:text-pink-500">Products</a>
-          <a href="#about" className="hover:text-pink-500">About</a>
-          <a href="#contact" className="hover:text-pink-500">Contact</a>
-        </div>
-      </nav>
+    /* HERO */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 96px 48px 80px;
+      background: linear-gradient(160deg, #fff0f6 0%, #f3eeff 60%, #fdf6f9 100%);
+      text-align: center;
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #c0437a;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+    .hero h1 {
+      font-size: clamp(38px, 6vw, 60px);
+      font-weight: 600;
+      line-height: 1.12;
+      color: #1a1a1a;
+      max-width: 600px;
+      margin-bottom: 18px;
+    }
+    .hero h1 span {
+      background: linear-gradient(90deg, #c0437a, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 17px;
+      color: #666;
+      margin-bottom: 36px;
+    }
+    .hero-btns {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-primary {
+      background: #c0437a;
+      color: #fff;
+      border: none;
+      padding: 13px 36px;
+      border-radius: 32px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #a8365f; }
+    .btn-secondary {
+      background: transparent;
+      color: #c0437a;
+      border: 1.5px solid #c0437a;
+      padding: 13px 36px;
+      border-radius: 32px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: #fff0f6; }
 
-      <section className="text-center py-24 bg-white/20 backdrop-blur-md">
-        <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-pink-500 to-purple-500 text-transparent bg-clip-text">
-          Beauty That Hits Different
-        </h2>
-        <p className="text-gray-800 mb-6">Trendy makeup. Clean look. Fast delivery.</p>
-        <button onClick={handleCheckout} className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-3 rounded-2xl shadow-lg hover:scale-105 transition">
-          Checkout Cart ({cart.length})
-        </button>
-      </section>
+    /* PRODUCTS */
+    .products-section {
+      padding: 72px 48px;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: #c0437a;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: 32px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 48px;
+      color: #1a1a1a;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 0.5px solid #eedde7;
+      transition: transform 0.22s, box-shadow 0.22s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 40px rgba(192,67,122,0.12);
+    }
+    .card-img {
+      width: 100%;
+      height: 170px;
+      background: linear-gradient(135deg, #fff0f6, #f3eeff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      position: relative;
+    }
+    .card-tag {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: #c0437a;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+    }
+    .card-body { padding: 16px 18px 18px; }
+    .card-name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-price {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .add-btn {
+      background: #c0437a;
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+    }
+    .add-btn:hover { background: #a8365f; }
+    .add-btn.added { background: #8b5cf6; }
 
-      <section id="products" className="p-10">
-        <h3 className="text-3xl font-semibold mb-8 text-center text-white">Featured Products</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {products.map((product) => (
-            <div key={product.id} className="bg-white/70 backdrop-blur-md p-5 rounded-3xl shadow hover:shadow-xl hover:-translate-y-1 transition">
-              <img src={product.img} className="h-40 w-full object-cover rounded-xl mb-4" />
-              <h4 className="font-semibold">{product.name}</h4>
-              <p className="text-gray-500 text-sm">{product.desc}</p>
-              <div className="mt-2">
-                <span className="font-bold">${product.price.toFixed(2)}</span>
-              </div>
-              <button onClick={() => addToCart(product)} className="mt-4 w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-2 rounded-xl hover:opacity-90">
-                Add to Cart
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
+    /* ABOUT */
+    .about {
+      background: linear-gradient(135deg, #c0437a 0%, #8b5cf6 100%);
+      padding: 88px 48px;
+      text-align: center;
+      color: #fff;
+    }
+    .about h2 {
+      font-size: 34px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .about p {
+      font-size: 17px;
+      opacity: 0.88;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
 
-      <section id="about" className="p-12 text-center">
-        <h3 className="text-2xl font-semibold mb-4 text-white">About Us</h3>
-        <p className="text-gray-100 max-w-xl mx-auto">
-          We provide high-quality trending products at affordable prices with fast shipping and reliable service.
-        </p>
-      </section>
+    /* FOOTER */
+    footer {
+      background: #1a1a1a;
+      color: #777;
+      text-align: center;
+      padding: 24px 48px;
+      font-size: 13px;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
 
-      <section id="contact" className="p-10 text-center">
-        <h3 className="text-2xl font-semibold mb-4 text-white">Contact</h3>
-        <p className="text-gray-100">support@zenvy.com</p>
-      </section>
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 32px;
+      font-size: 14px;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .toast.show { opacity: 1; }
 
-      <footer className="bg-black text-white text-center p-4 mt-10">
-        © 2026 Zenvy. All rights reserved.
-      </footer>
+    @media (max-width: 600px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 64px 24px 56px; }
+      .products-section { padding: 48px 20px; }
+      .about { padding: 64px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="logo" href="#">ZENVY</a>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#products">Products</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="cart-btn" onclick="checkout()">
+      Cart <span class="cart-badge" id="cart-count">0</span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow">New Arrivals 2026</p>
+    <h1>Beauty That <span>Hits Different</span></h1>
+    <p>Trendy makeup. Clean look. Fast delivery.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+      <button class="btn-secondary" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">Our Story</button>
     </div>
-  );
-}
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="products-section" id="products">
+    <p class="section-label">Our Collection</p>
+    <h2 class="section-title">Featured Products</h2>
+    <div class="grid" id="product-grid"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <h2>About Zenvy</h2>
+    <p>High-quality trending products at affordable prices with fast shipping and reliable service. Beauty that's accessible to everyone.</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="contact">
+    <span>© 2026 Zenvy. All rights reserved.</span>
+    <span>support@zenvy.com</span>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const products = [
+      { id: 1, name: "Hydrating Lip Gloss",      desc: "High-shine gloss with long-lasting hydration", price: 12.99, emoji: "💋", tag: "Bestseller" },
+      { id: 2, name: "Matte Liquid Foundation",  desc: "Full coverage, smooth finish",                  price: 14.99, emoji: "🌟", tag: "New" },
+      { id: 3, name: "Poreless Face Primer",      desc: "Blurs pores instantly",                         price: 11.99, emoji: "✨", tag: null },
+      { id: 4, name: "Waterproof Mascara",        desc: "Long-lasting volume",                           price:  9.99, emoji: "👁️", tag: "Fan Fave" },
+      { id: 5, name: "Cream Blush Stick",         desc: "Natural glow finish",                           price: 10.99, emoji: "🌸", tag: null },
+      { id: 6, name: "Makeup Setting Spray",      desc: "Locks makeup all day",                          price: 13.99, emoji: "💦", tag: "New" }
+    ];
+
+    let cart = [];
+
+    function renderProducts() {
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = products.map(p => `
+        <div class="card">
+          <div class="card-img">
+            <span>${p.emoji}</span>
+            ${p.tag ? `<span class="card-tag">${p.tag}</span>` : ''}
+          </div>
+          <div class="card-body">
+            <h4 class="card-name">${p.name}</h4>
+            <p class="card-desc">${p.desc}</p>
+            <div class="card-footer">
+              <span class="card-price">$${p.price.toFixed(2)}</span>
+              <button class="add-btn" id="btn-${p.id}" onclick="addToCart(${p.id})">Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      cart.push(product);
+      document.getElementById('cart-count').textContent = cart.length;
+      const btn = document.getElementById('btn-' + id);
+      btn.textContent = '✓ Added';
+      btn.classList.add('added');
+      setTimeout(() => {
+        btn.textContent = 'Add to Cart';
+        btn.classList.remove('added');
+      }, 1600);
+      showToast(product.name + ' added to cart');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        showToast('Your cart is empty!');
+        return;
+      }
+      showToast('Connect Stripe to enable checkout!');
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
